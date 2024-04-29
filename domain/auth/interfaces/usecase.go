@@ -1,7 +1,11 @@
 package interfaces
 
-import "context"
+import (
+	"context"
+
+	"github.com/mrakhaf/cat-social/models/dto"
+)
 
 type Usecase interface {
-	Login(ctx context.Context, email, password string) (string, error)
+	Login(ctx context.Context, email, password string) (data dto.Login, err error)
 }
