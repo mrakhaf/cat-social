@@ -3,11 +3,13 @@ package main
 import (
 	"net/http"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	authHandler "github.com/mrakhaf/cat-social/domain/auth/delivery/http"
 	"github.com/mrakhaf/cat-social/domain/auth/repository"
 	"github.com/mrakhaf/cat-social/domain/auth/usecase"
+	catHandler "github.com/mrakhaf/cat-social/domain/cat/delivery/http"
 	"github.com/mrakhaf/cat-social/shared/common"
 	formatJson "github.com/mrakhaf/cat-social/shared/common/json"
 	"github.com/mrakhaf/cat-social/shared/common/jwt"
@@ -22,6 +24,11 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Validator = common.NewValidator()
 
+	err := godotenv.Load("conf/config.env")
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+
 	//db config
 	catDB, err := database.ConnectDB()
 	if err != nil {
@@ -35,7 +42,11 @@ func main() {
 	//create group
 	userGroup := e.Group("/v1/user")
 
-	// catGroup := e.Group("/v1/cat")
+	catGroup := e.Group("/v1/cat")
+	catGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningMethod: "HS256",
+		SigningKey:    []byte("secret"),
+	}))
 	// {
 	// 	config := echojwt.Config{
 	// 		SigningKey: []byte("secret"),
@@ -52,6 +63,9 @@ func main() {
 	authRepo := repository.NewRepository(catDB)
 	authUsecase := usecase.NewUsecase(authRepo, jwtAccess)
 	authHandler.AuthHandler(userGroup, authUsecase, authRepo, formatResponse)
+
+	//cat
+	catHandler.CatHandler(catGroup, formatResponse, jwtAccess)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }

@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -24,36 +23,76 @@ func AuthHandler(authRoute *echo.Group, usecase interfaces.Usecase, repository i
 	}
 
 	authRoute.POST("/login", handler.Login)
-
-	authRoute.GET("/test", handler.Test)
+	authRoute.POST("/register", handler.Register)
 }
 
 func (h *handlerAuth) Login(c echo.Context) error {
 	var req request.Login
 
 	if err := c.Bind(&req); err != nil {
-		fmt.Println("test1")
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
 	if err := c.Validate(&req); err != nil {
-		fmt.Println("test2")
-		fmt.Println(err.Error())
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	//check is email exist
+	isEmailExist, dataUser, err := h.usecase.CheckIsEmailExist(c.Request().Context(), req.Email)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	if !isEmailExist {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Email not found"})
+	}
+
+	//check password
+	isPasswordCorrect := h.usecase.CheckUserPassword(c.Request().Context(), req.Password, dataUser)
+
+	if !isPasswordCorrect {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Wrong password"})
 	}
 
 	data, err := h.usecase.Login(c.Request().Context(), req.Email, req.Password)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
 	return h.Json.Ok(c, "User logged successfully", data)
 
 }
 
-func (h *handlerAuth) Test(c echo.Context) error {
+func (h *handlerAuth) Register(c echo.Context) error {
 
-	return c.String(http.StatusOK, "Welcome to Cat Social!!!")
+	var req request.Register
 
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	//validate email
+	isEmailExist, _, err := h.usecase.CheckIsEmailExist(c.Request().Context(), req.Email)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	if isEmailExist {
+		return c.JSON(http.StatusConflict, map[string]string{"error": "Email already exist"})
+	}
+
+	data, err := h.usecase.Register(c.Request().Context(), req)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return h.Json.Ok(c, "User registered successfully", data)
 }

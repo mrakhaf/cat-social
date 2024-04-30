@@ -14,6 +14,17 @@ func ConnectDB() (*sql.DB, error) {
 	stringDB := fmt.Sprintf("user=%s password=%s dbname=%s port=%s sslmode=disable", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
 
 	db, err := sql.Open("postgres", stringDB)
+
+	if err != nil {
+		return nil, err
+	}
+
+	errConn := db.Ping()
+	if errConn != nil {
+		err = fmt.Errorf("failed to connect to db: %s", err)
+		return nil, err
+	}
+
 	fmt.Println("successfully connected to db")
 	return db, err
 

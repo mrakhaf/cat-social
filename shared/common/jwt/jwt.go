@@ -3,6 +3,7 @@ package jwt
 import (
 	"time"
 
+	jwtToken "github.com/golang-jwt/jwt"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
@@ -33,22 +34,11 @@ func (j *JWT) GenerateToken(userId string) (tokenString string, err error) {
 	return
 }
 
-func (j *JWT) GetAccessFromToken(token string) (userId string, err error) {
+func (j *JWT) GetUserIdFromToken(ctx echo.Context) (userId string, err error) {
 
-	tokenClaims, err := jwt.ParseWithClaims(token, &jwtCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("secret"), nil
-	})
-	if err != nil {
-		return
-	}
-
-	claims, ok := tokenClaims.Claims.(*jwtCustomClaims)
-	if !ok || !tokenClaims.Valid {
-		err = echo.ErrUnauthorized
-		return
-	}
-
-	userId = claims.UserId
+	token := ctx.Get("user").(*jwtToken.Token)
+	claims := token.Claims.(jwtToken.MapClaims)
+	userId = claims["UserId"].(string)
 
 	return
 }
