@@ -1,0 +1,5 @@
+CREATE TABLE cat_images (
+    id VARCHAR(255) PRIMARY KEY,
+    idCat VARCHAR(255) NOT NULL,
+    imageUrl VARCHAR(255) NOT NULL
+);

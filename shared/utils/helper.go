@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -33,4 +34,16 @@ func CheckPasswordHash(password, hash string) error {
 	}
 
 	return nil
+}
+
+func ValidationRace(race string) bool {
+	switch race {
+	case "Persian", "Maine Coon", "Siamese", "Ragdoll", "Bengal", "Sphynx", "British Shorthair", "Abyssinian", "Scottish Fold", "Birman":
+		return true
+	}
+	return false
+}
+
+func GenerateDatetimeIso8601() string {
+	return time.Now().Format(time.RFC3339)
 }

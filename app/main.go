@@ -7,17 +7,22 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	authHandler "github.com/mrakhaf/cat-social/domain/auth/delivery/http"
-	"github.com/mrakhaf/cat-social/domain/auth/repository"
-	"github.com/mrakhaf/cat-social/domain/auth/usecase"
+	authRepo "github.com/mrakhaf/cat-social/domain/auth/repository"
+	authUsecase "github.com/mrakhaf/cat-social/domain/auth/usecase"
 	catHandler "github.com/mrakhaf/cat-social/domain/cat/delivery/http"
+	catRepo "github.com/mrakhaf/cat-social/domain/cat/repository"
+	catUsecase "github.com/mrakhaf/cat-social/domain/cat/usecase"
 	"github.com/mrakhaf/cat-social/shared/common"
 	formatJson "github.com/mrakhaf/cat-social/shared/common/json"
 	"github.com/mrakhaf/cat-social/shared/common/jwt"
 	"github.com/mrakhaf/cat-social/shared/config/database"
+	"github.com/mrakhaf/cat-social/shared/config/setup"
 )
 
 func main() {
 	e := echo.New()
+
+	setup.SetupTimezone()
 
 	// Middleware
 	e.Use(middleware.Logger())
@@ -47,25 +52,19 @@ func main() {
 		SigningMethod: "HS256",
 		SigningKey:    []byte("secret"),
 	}))
-	// {
-	// 	config := echojwt.Config{
-	// 		SigningKey: []byte("secret"),
-	// 	}
 
-	// 	catGroup.Use(echojwt.WithConfig(config))
-	// }
-
-	//
 	formatResponse := formatJson.NewResponse()
 	jwtAccess := jwt.NewJWT()
 
 	//auth
-	authRepo := repository.NewRepository(catDB)
-	authUsecase := usecase.NewUsecase(authRepo, jwtAccess)
+	authRepo := authRepo.NewRepository(catDB)
+	authUsecase := authUsecase.NewUsecase(authRepo, jwtAccess)
 	authHandler.AuthHandler(userGroup, authUsecase, authRepo, formatResponse)
 
 	//cat
-	catHandler.CatHandler(catGroup, formatResponse, jwtAccess)
+	catRepo := catRepo.NewRepository(catDB)
+	catUsecase := catUsecase.NewUsecase(catRepo)
+	catHandler.CatHandler(catGroup, formatResponse, jwtAccess, catUsecase)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
