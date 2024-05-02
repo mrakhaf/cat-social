@@ -12,6 +12,9 @@ import (
 	catHandler "github.com/mrakhaf/cat-social/domain/cat/delivery/http"
 	catRepo "github.com/mrakhaf/cat-social/domain/cat/repository"
 	catUsecase "github.com/mrakhaf/cat-social/domain/cat/usecase"
+	matchCatHandler "github.com/mrakhaf/cat-social/domain/match_cat/delivery/http"
+	matchCatRepo "github.com/mrakhaf/cat-social/domain/match_cat/repository"
+	matchCatUsecase "github.com/mrakhaf/cat-social/domain/match_cat/usecase"
 	"github.com/mrakhaf/cat-social/shared/common"
 	formatJson "github.com/mrakhaf/cat-social/shared/common/json"
 	"github.com/mrakhaf/cat-social/shared/common/jwt"
@@ -65,6 +68,11 @@ func main() {
 	catRepo := catRepo.NewRepository(catDB)
 	catUsecase := catUsecase.NewUsecase(catRepo)
 	catHandler.CatHandler(catGroup, formatResponse, jwtAccess, catUsecase)
+
+	//match caat
+	matchCatRepo := matchCatRepo.NewRepository(catDB)
+	matchCatUseCase := matchCatUsecase.NewUsecase(matchCatRepo)
+	matchCatHandler.MatchCatHandler(catGroup, formatResponse, jwtAccess, matchCatUseCase)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
