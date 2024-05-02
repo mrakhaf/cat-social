@@ -8,3 +8,15 @@ type UploadCat struct {
 	Description string   `json:"description" validate:"required,min=1,max=200"`
 	ImageUrls   []string `json:"imageUrls" validate:"required,min=1,dive,url"`
 }
+
+type GetCatParam struct {
+	Id         *string `query:"id" validate:"omitempty"`
+	Limit      *int    `query:"limit" validate:"omitempty,gt=1"`
+	Offset     *int    `query:"offset" validate:"omitempty,gt=1"`
+	Race       *string `query:"race" validate:"omitempty"`
+	Sex        *string `query:"sex" validate:"omitempty,oneof=male female"`
+	HasMatch   *string `query:"hasMatched" validate:"omitempty,oneof=true false"`
+	AgeInMonth *string `query:"ageInMonth" validate:"omitempty,oneof=>4 <4 4"`
+	Owned      *string `query:"owned" validate:"omitempty,oneof=true false"`
+	Search     *string `query:"search" validate:"omitempty"`
+}

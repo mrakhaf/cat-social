@@ -77,7 +77,7 @@ func (r *repoHandler) GetCats(ctx context.Context, query string) (cats []entity.
 
 	for rows.Next() {
 
-		err = rows.Scan(&cat.Id, &cat.Name, &cat.AgeInMonth, &cat.Race, &cat.Sex, &cat.Description, &cat.CreatedAt)
+		err = rows.Scan(&cat.Id, &cat.Name, &cat.Race, &cat.Sex, &cat.AgeInMonth, &cat.Description, &cat.HasMatched, &cat.ImageUrls, &cat.CreatedAt)
 
 		if err != nil {
 			return
