@@ -1,1 +1,1 @@
-DROP TABLE cat_images;
+DROP TABLE match_cats;
