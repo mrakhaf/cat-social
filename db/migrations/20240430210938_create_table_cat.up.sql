@@ -6,5 +6,6 @@ CREATE TABLE cats (
     ageInMonths INTEGER NOT NULL,
     description VARCHAR(255) NOT NULL,
     userId VARCHAR(255) NOT NULL,
+    imageUrls VARCHAR(255) NOT NULL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
