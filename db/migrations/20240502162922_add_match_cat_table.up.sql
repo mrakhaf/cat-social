@@ -1,0 +1,6 @@
+CREATE TABLE match_cats (
+    id VARCHAR(255) PRIMARY KEY,
+    matchCatId INTEGER REFERENCES cats(id),
+    userCatId INTEGER REFERENCES cats(id),
+    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
