@@ -79,6 +79,7 @@ func (u *usecase) CheckIsEmailExist(ctx context.Context, email string) (isEmailE
 	data, err = u.repository.GetDataAccount(email)
 
 	if err != nil && err.Error() == "sql: no rows in result set" {
+		err = nil
 		isEmailExist = false
 		return
 	}
@@ -89,11 +90,6 @@ func (u *usecase) CheckIsEmailExist(ctx context.Context, email string) (isEmailE
 	}
 
 	isEmailExist = true
-
-	if err != nil {
-		err = fmt.Errorf("failed to check is email exist: %s", err)
-		return
-	}
 
 	return
 }
