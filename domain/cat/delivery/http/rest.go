@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -25,9 +26,16 @@ func CatHandler(catRoute *echo.Group, Json common.JSON, JwtAccess *jwtAccess.JWT
 	}
 
 	catRoute.POST("", handler.UploadCat)
+	catRoute.GET("", handler.GetCats)
 }
 
 func (h handlerCat) UploadCat(c echo.Context) error {
+
+	userId, err := h.JwtAccess.GetUserIdFromToken(c)
+
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
+	}
 
 	var dataUploadCat request.UploadCat
 
@@ -45,12 +53,6 @@ func (h handlerCat) UploadCat(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Wrong race"})
 	}
 
-	userId, err := h.JwtAccess.GetUserIdFromToken(c)
-
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
-	}
-
 	data, err := h.usecase.UploadCat(c.Request().Context(), dataUploadCat, userId)
 
 	if err != nil {
@@ -58,4 +60,43 @@ func (h handlerCat) UploadCat(c echo.Context) error {
 	}
 
 	return h.Json.Ok(c, "success", data)
+}
+
+func (h handlerCat) GetCats(c echo.Context) error {
+
+	userId, err := h.JwtAccess.GetUserIdFromToken(c)
+
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
+	}
+
+	var req request.GetCatParam
+
+	if err := (&echo.DefaultBinder{}).BindQueryParams(c, &req); err != nil {
+		return err
+	}
+
+	fmt.Println(req)
+
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
+	}
+
+	if req.Race != nil {
+
+		isRace := utils.ValidationRace(*req.Race)
+
+		if !isRace {
+			return c.JSON(http.StatusBadRequest, map[string]string{"message": "Wrong race"})
+		}
+	}
+
+	data, err := h.usecase.GetCat(c.Request().Context(), userId, req)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return h.Json.Ok(c, "success", data)
+
 }
