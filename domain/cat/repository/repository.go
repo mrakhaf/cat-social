@@ -5,9 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/mrakhaf/cat-social/domain/cat/interfaces"
 	"github.com/mrakhaf/cat-social/models/dto"
+	"github.com/mrakhaf/cat-social/models/entity"
 	"github.com/mrakhaf/cat-social/models/request"
 	"github.com/mrakhaf/cat-social/shared/utils"
 )
@@ -25,11 +28,11 @@ func NewRepository(catDB *sql.DB) interfaces.Repository {
 func (r *repoHandler) SaveCat(ctx context.Context, req request.UploadCat, userId string) (data dto.SaveCatDto, err error) {
 
 	idCat := utils.GenerateUUID()
-	createdAt := utils.GenerateDatetimeIso8601()
+	createdAt := time.Now()
 
-	querySaveCat := fmt.Sprintf(`INSERT INTO cats (id, name, ageInMonths, race, sex, description, userId, createdAt) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s')`, idCat, req.Name, req.AgeInMonth, req.Race, req.Sex, req.Description, userId, createdAt)
+	imageUrls := strings.Join(req.ImageUrls, ",")
 
-	querySaveImageCat := `INSERT INTO cat_images (id, idCat, imageUrl) VALUES ('%s', '%s', '%s')`
+	querySaveCat := fmt.Sprintf(`INSERT INTO cats (id, name, ageInMonths, race, sex, description, userId, imageUrls, createdAt) VALUES ('%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', '%s')`, idCat, req.Name, req.AgeInMonth, req.Race, req.Sex, req.Description, userId, imageUrls, createdAt.Format(time.RFC3339))
 
 	tx, err := r.catDB.Begin()
 
@@ -45,16 +48,6 @@ func (r *repoHandler) SaveCat(ctx context.Context, req request.UploadCat, userId
 		log.Fatal(err)
 	}
 
-	for _, image := range req.ImageUrls {
-		id := utils.GenerateUUID()
-		_, err = tx.Exec(fmt.Sprintf(querySaveImageCat, id, idCat, image))
-
-		if err != nil {
-			tx.Rollback()
-			log.Fatal(err)
-		}
-	}
-
 	err = tx.Commit()
 
 	if err != nil {
@@ -64,7 +57,33 @@ func (r *repoHandler) SaveCat(ctx context.Context, req request.UploadCat, userId
 
 	data = dto.SaveCatDto{
 		Id:        idCat,
-		CreatedAt: createdAt,
+		CreatedAt: utils.ConvertDateIso(createdAt),
+	}
+
+	return
+}
+
+func (r *repoHandler) GetCats(ctx context.Context, query string) (cats []entity.Cat, err error) {
+
+	rows, err := r.catDB.Query(query)
+
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	cat := entity.Cat{}
+
+	for rows.Next() {
+
+		err = rows.Scan(&cat.Id, &cat.Name, &cat.AgeInMonth, &cat.Race, &cat.Sex, &cat.Description, &cat.CreatedAt)
+
+		if err != nil {
+			return
+		}
+
+		cats = append(cats, cat)
 	}
 
 	return

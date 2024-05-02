@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -44,6 +45,16 @@ func ValidationRace(race string) bool {
 	return false
 }
 
-func GenerateDatetimeIso8601() string {
-	return time.Now().Format(time.RFC3339)
+func ConvertDateIso(datetime time.Time) string {
+	return time.Now().Format("2006-01-02")
+}
+
+func SliceToString(s []string) (data string) {
+	data = strings.Join(s, ",")
+	return
+}
+
+func StringToSlice(data string) (s []string) {
+	s = strings.Split(data, ",")
+	return
 }
