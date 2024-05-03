@@ -133,3 +133,59 @@ func (r *repoHandler) DeleteCat(ctx context.Context, catId string) (err error) {
 
 	return
 }
+
+func (r *repoHandler) GetCatUserHasNotMatch(ctx context.Context, userId, catId string) (sex string, err error) {
+
+	var cat entity.Cat
+
+	query := fmt.Sprintf(`SELECT id, sex FROM cats WHERE userId = '%s' AND id = '%s' AND hasMatched IS NOT TRUE`, userId, catId)
+	fmt.Println(query)
+	row := r.catDB.QueryRow(query)
+
+	err = row.Scan(&cat.Id, &cat.Sex)
+
+	if err != nil {
+		return
+	}
+
+	sex = cat.Sex
+
+	return
+
+}
+
+func (r *repoHandler) GetCatMatchHasNotMatch(ctx context.Context, userId, catId string) (sex string, err error) {
+
+	var cat entity.Cat
+
+	query := fmt.Sprintf(`SELECT id, sex FROM cats WHERE userId != '%s' AND id = '%s' AND hasMatched IS NOT TRUE`, userId, catId)
+	fmt.Println(query)
+	row := r.catDB.QueryRow(query)
+
+	err = row.Scan(&cat.Id, &cat.Sex)
+
+	if err != nil {
+		return
+	}
+
+	sex = cat.Sex
+
+	return
+
+}
+
+func (r *repoHandler) SaveMatchCat(ctx context.Context, userId string, req request.MatchCat) (matchId string, err error) {
+
+	matchId = utils.GenerateUUID()
+
+	query := fmt.Sprintf(`INSERT INTO match_cats (matchid, matchcatid, usercatid, status, issuedby, message, createdat) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')`, matchId, req.MatchCatId, req.UserCatId, "pending", userId, req.Message, time.Now().Format(time.RFC3339))
+
+	_, err = r.catDB.Exec(query)
+
+	if err != nil {
+		return
+	}
+
+	return
+
+}

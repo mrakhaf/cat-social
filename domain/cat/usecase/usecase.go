@@ -210,3 +210,46 @@ func (u *usecase) DeleteCat(ctx context.Context, catId string) (err error) {
 	return
 
 }
+
+func (u *usecase) ValidateMatchCat(ctx context.Context, userId string, req request.MatchCat) (err error) {
+
+	//get cat user
+	sexUserCat, err := u.repository.GetCatUserHasNotMatch(ctx, userId, req.UserCatId)
+
+	if err != nil {
+		err = fmt.Errorf("failed to get cat: %s", err)
+		return
+	}
+
+	//get cat match
+	sexMatchCat, err := u.repository.GetCatMatchHasNotMatch(ctx, userId, req.MatchCatId)
+
+	if err != nil {
+		err = fmt.Errorf("failed to get cat: %s", err)
+		return
+	}
+
+	fmt.Println(sexUserCat)
+	fmt.Println(sexMatchCat)
+	//validate sex
+	if sexUserCat == sexMatchCat {
+		err = fmt.Errorf("sex not match")
+		return
+	}
+
+	return
+
+}
+
+func (u *usecase) UploadMatch(ctx context.Context, req request.MatchCat, userId string) (err error) {
+
+	_, err = u.repository.SaveMatchCat(ctx, userId, req)
+
+	if err != nil {
+		err = fmt.Errorf("failed to upload match: %s", err)
+		return
+	}
+
+	return
+
+}

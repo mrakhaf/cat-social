@@ -20,3 +20,9 @@ type GetCatParam struct {
 	Owned      *string `query:"owned" validate:"omitempty,oneof=true false"`
 	Search     *string `query:"search" validate:"omitempty"`
 }
+
+type MatchCat struct {
+	MatchCatId string `json:"matchCatId" validate:"required"`
+	UserCatId  string `json:"userCatId" validate:"required"`
+	Message    string `json:"message" validate:"required,min=5,max=120"`
+}

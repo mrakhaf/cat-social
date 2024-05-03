@@ -94,5 +94,8 @@ func (h *handlerAuth) Register(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return h.Json.Ok(c, "User registered successfully", data)
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "User registered successfully",
+		"data":    data,
+	})
 }

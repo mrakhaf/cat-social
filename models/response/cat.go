@@ -11,3 +11,7 @@ type GetCats struct {
 	HasMatched  bool     `json:"hasMatched"`
 	CreatedAt   string   `json:"createdAt"`
 }
+
+type MatchResponse struct {
+	MatchId string `json:"matchId"`
+}
