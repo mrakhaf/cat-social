@@ -189,3 +189,18 @@ func (r *repoHandler) SaveMatchCat(ctx context.Context, userId string, req reque
 	return
 
 }
+
+func (r *repoHandler) GetCatByID(ctx context.Context, catId string) (cat entity.Cat, err error) {
+
+	query := fmt.Sprintf(`SELECT * FROM cats WHERE id = '%s'`, catId)
+
+	row := r.catDB.QueryRow(query)
+
+	err = row.Scan(&cat.Id, &cat.Name, &cat.Race, &cat.Sex, &cat.AgeInMonth, &cat.Description, &cat.HasMatched, &cat.ImageUrls, &cat.CreatedAt)
+
+	if err != nil {
+		return
+	}
+
+	return
+}

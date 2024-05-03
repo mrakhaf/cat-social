@@ -213,19 +213,35 @@ func (u *usecase) DeleteCat(ctx context.Context, catId string) (err error) {
 
 func (u *usecase) ValidateMatchCat(ctx context.Context, userId string, req request.MatchCat) (err error) {
 
-	//get cat user
-	sexUserCat, err := u.repository.GetCatUserHasNotMatch(ctx, userId, req.UserCatId)
+	//get cat
+	_, err = u.repository.GetCatByID(ctx, req.MatchCatId)
 
 	if err != nil {
-		err = fmt.Errorf("failed to get cat: %s", err)
+		err = fmt.Errorf("404")
 		return
 	}
 
-	//get cat match
+	//get cat user
+	_, err = u.repository.GetCatUser(ctx, userId, req.UserCatId)
+
+	if err != nil {
+		err = fmt.Errorf("404")
+		return
+	}
+
+	//get cat user not matched
+	sexUserCat, err := u.repository.GetCatUserHasNotMatch(ctx, userId, req.UserCatId)
+
+	if err != nil {
+		err = fmt.Errorf("400")
+		return
+	}
+
+	//get cat match no matched
 	sexMatchCat, err := u.repository.GetCatMatchHasNotMatch(ctx, userId, req.MatchCatId)
 
 	if err != nil {
-		err = fmt.Errorf("failed to get cat: %s", err)
+		err = fmt.Errorf("400")
 		return
 	}
 
@@ -233,7 +249,7 @@ func (u *usecase) ValidateMatchCat(ctx context.Context, userId string, req reque
 	fmt.Println(sexMatchCat)
 	//validate sex
 	if sexUserCat == sexMatchCat {
-		err = fmt.Errorf("sex not match")
+		err = fmt.Errorf("400")
 		return
 	}
 

@@ -193,7 +193,7 @@ func (h handlerCat) MatchCat(c echo.Context) error {
 	err = h.usecase.ValidateMatchCat(c.Request().Context(), userId, req)
 
 	if err != nil {
-		if err.Error() == "sex not match" {
+		if err.Error() == "400" {
 			return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
 		}
 

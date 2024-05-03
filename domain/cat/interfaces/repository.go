@@ -17,4 +17,5 @@ type Repository interface {
 	GetCatUserHasNotMatch(ctx context.Context, userId, catId string) (sex string, err error)
 	GetCatMatchHasNotMatch(ctx context.Context, userId, catId string) (sex string, err error)
 	SaveMatchCat(ctx context.Context, userId string, req request.MatchCat) (matchId string, err error)
+	GetCatByID(ctx context.Context, catId string) (cat entity.Cat, err error)
 }
