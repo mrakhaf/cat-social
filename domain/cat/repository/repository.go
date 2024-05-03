@@ -204,3 +204,86 @@ func (r *repoHandler) GetCatByID(ctx context.Context, catId string) (cat entity.
 
 	return
 }
+
+func (r *repoHandler) GetMatchByIdAndUserIdApprover(ctx context.Context, matchId string, userId string) (matchCatId, userCatId string, err error) {
+
+	query := fmt.Sprintf(`SELECT matchid, matchcatid, usercatid FROM match_cats 
+		INNER JOIN cats on match_cats.matchcatid = cats.id 
+		WHERE matchid = '%s' 
+		AND userid = '%s' AND status = 'pending'`, matchId, userId)
+
+	fmt.Println(query)
+
+	row := r.catDB.QueryRow(query)
+
+	err = row.Scan(&matchId, &matchCatId, &userCatId)
+
+	if err != nil {
+		return
+	}
+
+	return
+
+}
+
+func (r *repoHandler) GetMatchStatusPending(ctx context.Context, matchId string) (err error) {
+
+	query := fmt.Sprintf(`SELECT matchid FROM match_cats WHERE status = 'pending' AND matchid = '%s'`, matchId)
+
+	fmt.Println(query)
+
+	row := r.catDB.QueryRow(query)
+
+	err = row.Scan(&matchId)
+
+	if err != nil && err == sql.ErrNoRows {
+		err = nil
+		return
+	}
+
+	return
+
+}
+
+func (r *repoHandler) UpdatedMatchStatus(ctx context.Context, matchId, status, matchCatId, userCatId string) (err error) {
+
+	queryUpdateStatus := fmt.Sprintf(`UPDATE match_cats SET status = '%s' WHERE matchid = '%s'`, status, matchId)
+	queryUpdateUserCatHasMatch := fmt.Sprintf(`UPDATE cats SET hasMatched = true WHERE id = '%s'`, userCatId)
+	queryUpdateMatchCatHasMatch := fmt.Sprintf(`UPDATE cats SET hasMatched = true WHERE id = '%s'`, matchCatId)
+
+	tx, err := r.catDB.Begin()
+
+	if err != nil {
+		return
+	}
+
+	_, err = tx.Exec(queryUpdateStatus)
+
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	_, err = tx.Exec(queryUpdateUserCatHasMatch)
+
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	_, err = tx.Exec(queryUpdateMatchCatHasMatch)
+
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		return
+	}
+
+	return
+
+}

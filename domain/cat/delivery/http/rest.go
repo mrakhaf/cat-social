@@ -13,16 +13,18 @@ import (
 )
 
 type handlerCat struct {
-	Json      common.JSON
-	JwtAccess *jwtAccess.JWT
-	usecase   interfaces.Usecase
+	Json       common.JSON
+	JwtAccess  *jwtAccess.JWT
+	usecase    interfaces.Usecase
+	repository interfaces.Repository
 }
 
-func CatHandler(catRoute *echo.Group, Json common.JSON, JwtAccess *jwtAccess.JWT, usecase interfaces.Usecase) {
+func CatHandler(catRoute *echo.Group, Json common.JSON, JwtAccess *jwtAccess.JWT, usecase interfaces.Usecase, repository interfaces.Repository) {
 	handler := handlerCat{
-		Json:      Json,
-		JwtAccess: JwtAccess,
-		usecase:   usecase,
+		Json:       Json,
+		JwtAccess:  JwtAccess,
+		usecase:    usecase,
+		repository: repository,
 	}
 
 	catRoute.POST("", handler.UploadCat)
@@ -30,6 +32,7 @@ func CatHandler(catRoute *echo.Group, Json common.JSON, JwtAccess *jwtAccess.JWT
 	catRoute.PUT("/:id", handler.UpdateCat)
 	catRoute.DELETE("/:id", handler.DeleteCat)
 	catRoute.POST("/match", handler.MatchCat)
+	catRoute.POST("/match/approve", handler.ApproveMatch)
 }
 
 func (h handlerCat) UploadCat(c echo.Context) error {
@@ -207,5 +210,44 @@ func (h handlerCat) MatchCat(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, nil)
+
+}
+
+func (h handlerCat) ApproveMatch(c echo.Context) error {
+	var req request.ApproveRejectMatch
+
+	userId, err := h.JwtAccess.GetUserIdFromToken(c)
+
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
+	}
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
+	}
+
+	err = h.repository.GetMatchStatusPending(c.Request().Context(), req.MatchId)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
+	}
+
+	matchCatId, userCatId, err := h.repository.GetMatchByIdAndUserIdApprover(c.Request().Context(), req.MatchId, userId)
+
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"message": err.Error()})
+	}
+
+	err = h.usecase.ApproveMatch(c.Request().Context(), req, matchCatId, userCatId)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{"message": "success approve match"})
 
 }

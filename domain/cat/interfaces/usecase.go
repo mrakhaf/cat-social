@@ -14,4 +14,5 @@ type Usecase interface {
 	DeleteCat(ctx context.Context, catId string) (err error)
 	ValidateMatchCat(ctx context.Context, userId string, req request.MatchCat) (err error)
 	UploadMatch(ctx context.Context, req request.MatchCat, userId string) (err error)
+	ApproveMatch(ctx context.Context, req request.ApproveRejectMatch, matchCatId, userCatId string) (err error)
 }

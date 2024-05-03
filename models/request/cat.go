@@ -26,3 +26,7 @@ type MatchCat struct {
 	UserCatId  string `json:"userCatId" validate:"required"`
 	Message    string `json:"message" validate:"required,min=5,max=120"`
 }
+
+type ApproveRejectMatch struct {
+	MatchId string `json:"matchId"`
+}

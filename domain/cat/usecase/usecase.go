@@ -269,3 +269,16 @@ func (u *usecase) UploadMatch(ctx context.Context, req request.MatchCat, userId 
 	return
 
 }
+
+func (u *usecase) ApproveMatch(ctx context.Context, req request.ApproveRejectMatch, matchCatId, userCatId string) (err error) {
+
+	err = u.repository.UpdatedMatchStatus(ctx, req.MatchId, "approved", matchCatId, userCatId)
+
+	if err != nil {
+		err = fmt.Errorf("failed to approve match: %s", err)
+		return
+	}
+
+	return
+
+}
