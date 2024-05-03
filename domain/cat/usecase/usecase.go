@@ -174,3 +174,39 @@ func (u *usecase) GetCat(ctx context.Context, userId string, req request.GetCatP
 	return
 
 }
+
+func (u *usecase) ValidationCatUser(ctx context.Context, catId, userId string) (err error) {
+	_, err = u.repository.GetCatUser(ctx, userId, catId)
+
+	if err != nil {
+		err = fmt.Errorf("failed to get cat: %s", err)
+		return
+	}
+
+	return
+}
+
+func (u *usecase) UpdateCat(ctx context.Context, catId, userId string, req request.UploadCat) (err error) {
+
+	err = u.repository.UpdateCat(ctx, catId, userId, req)
+
+	if err != nil {
+		err = fmt.Errorf("failed to update cat: %s", err)
+		return
+	}
+
+	return
+}
+
+func (u *usecase) DeleteCat(ctx context.Context, catId string) (err error) {
+
+	err = u.repository.DeleteCat(ctx, catId)
+
+	if err != nil {
+		err = fmt.Errorf("failed to delete cat: %s", err)
+		return
+	}
+
+	return
+
+}
