@@ -88,3 +88,48 @@ func (r *repoHandler) GetCats(ctx context.Context, query string) (cats []entity.
 
 	return
 }
+
+func (r *repoHandler) GetCatUser(ctx context.Context, userId, catId string) (cats entity.Cat, err error) {
+
+	query := fmt.Sprintf(`SELECT id FROM cats WHERE userId = '%s' AND id = '%s'`, userId, catId)
+
+	fmt.Println(query)
+
+	row := r.catDB.QueryRow(query)
+
+	err = row.Scan(&cats.Id)
+
+	if err != nil {
+		return
+	}
+
+	return
+
+}
+
+func (r *repoHandler) UpdateCat(ctx context.Context, catId, userId string, req request.UploadCat) (err error) {
+	imageUrls := utils.SliceToString(req.ImageUrls)
+
+	query := fmt.Sprintf(`UPDATE cats SET name = '%s', ageInMonths = %d, race = '%s', sex = '%s', description = '%s', imageUrls = '%s' WHERE id = '%s' AND userId = '%s'`, req.Name, req.AgeInMonth, req.Race, req.Sex, req.Description, imageUrls, catId, userId)
+
+	_, err = r.catDB.Exec(query)
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (r *repoHandler) DeleteCat(ctx context.Context, catId string) (err error) {
+
+	query := fmt.Sprintf(`DELETE FROM cats WHERE id = '%s'`, catId)
+
+	_, err = r.catDB.Exec(query)
+
+	if err != nil {
+		return
+	}
+
+	return
+}
