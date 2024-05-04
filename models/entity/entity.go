@@ -3,10 +3,11 @@ package entity
 import "time"
 
 type User struct {
-	Id       string
-	Email    string
-	Password string
-	Name     string
+	Id        string
+	Email     string
+	Password  string
+	Name      string
+	CreatedAt time.Time
 }
 
 type Cat struct {
