@@ -225,6 +225,7 @@ func (u *usecase) ValidateMatchCat(ctx context.Context, userId string, req reque
 	_, err = u.repository.GetCatUser(ctx, userId, req.UserCatId)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		err = fmt.Errorf("404")
 		return
 	}
