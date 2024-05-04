@@ -32,6 +32,7 @@ func CatHandler(catRoute *echo.Group, Json common.JSON, JwtAccess *jwtAccess.JWT
 	catRoute.PUT("/:id", handler.UpdateCat)
 	catRoute.DELETE("/:id", handler.DeleteCat)
 	catRoute.POST("/match", handler.MatchCat)
+	catRoute.GET("/match", handler.GetMatchs)
 	catRoute.POST("/match/approve", handler.ApproveMatch)
 	catRoute.POST("/match/reject", handler.RejectMatch)
 	catRoute.DELETE("/match/:id", handler.DeleteMatch)
@@ -321,5 +322,23 @@ func (h handlerCat) DeleteMatch(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]string{"message": "success delete match"})
+
+}
+
+func (h handlerCat) GetMatchs(c echo.Context) error {
+
+	userId, err := h.JwtAccess.GetUserIdFromToken(c)
+
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
+	}
+
+	data, err := h.usecase.GetMatchs(c.Request().Context(), userId)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return h.Json.Ok(c, "success", data)
 
 }
