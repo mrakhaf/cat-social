@@ -217,8 +217,6 @@ func (u *usecase) ValidateMatchCat(ctx context.Context, userId string, req reque
 	_, err = u.repository.GetCatByID(ctx, req.MatchCatId)
 
 	if err != nil {
-		fmt.Println("test1")
-		fmt.Println(err.Error())
 		err = fmt.Errorf("404")
 		return
 	}
@@ -227,7 +225,6 @@ func (u *usecase) ValidateMatchCat(ctx context.Context, userId string, req reque
 	_, err = u.repository.GetCatUser(ctx, userId, req.UserCatId)
 
 	if err != nil {
-		fmt.Println("test2")
 		fmt.Println(err.Error())
 		err = fmt.Errorf("404")
 		return
@@ -237,7 +234,6 @@ func (u *usecase) ValidateMatchCat(ctx context.Context, userId string, req reque
 	sexUserCat, err := u.repository.GetCatUserHasNotMatch(ctx, userId, req.UserCatId)
 
 	if err != nil {
-		fmt.Println("test3")
 		err = fmt.Errorf("400")
 		return
 	}
@@ -246,7 +242,6 @@ func (u *usecase) ValidateMatchCat(ctx context.Context, userId string, req reque
 	sexMatchCat, err := u.repository.GetCatMatchHasNotMatch(ctx, userId, req.MatchCatId)
 
 	if err != nil {
-		fmt.Println("test4")
 		err = fmt.Errorf("400")
 		return
 	}
@@ -255,7 +250,6 @@ func (u *usecase) ValidateMatchCat(ctx context.Context, userId string, req reque
 	fmt.Println(sexMatchCat)
 	//validate sex
 	if sexUserCat == sexMatchCat {
-		fmt.Println("test5")
 		err = fmt.Errorf("400")
 		return
 	}
