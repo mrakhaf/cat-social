@@ -210,3 +210,75 @@ func (u *usecase) DeleteCat(ctx context.Context, catId string) (err error) {
 	return
 
 }
+
+func (u *usecase) ValidateMatchCat(ctx context.Context, userId string, req request.MatchCat) (err error) {
+
+	//get cat
+	_, err = u.repository.GetCatByID(ctx, req.MatchCatId)
+
+	if err != nil {
+		err = fmt.Errorf("404")
+		return
+	}
+
+	//get cat user
+	_, err = u.repository.GetCatUser(ctx, userId, req.UserCatId)
+
+	if err != nil {
+		err = fmt.Errorf("404")
+		return
+	}
+
+	//get cat user not matched
+	sexUserCat, err := u.repository.GetCatUserHasNotMatch(ctx, userId, req.UserCatId)
+
+	if err != nil {
+		err = fmt.Errorf("400")
+		return
+	}
+
+	//get cat match no matched
+	sexMatchCat, err := u.repository.GetCatMatchHasNotMatch(ctx, userId, req.MatchCatId)
+
+	if err != nil {
+		err = fmt.Errorf("400")
+		return
+	}
+
+	fmt.Println(sexUserCat)
+	fmt.Println(sexMatchCat)
+	//validate sex
+	if sexUserCat == sexMatchCat {
+		err = fmt.Errorf("400")
+		return
+	}
+
+	return
+
+}
+
+func (u *usecase) UploadMatch(ctx context.Context, req request.MatchCat, userId string) (err error) {
+
+	_, err = u.repository.SaveMatchCat(ctx, userId, req)
+
+	if err != nil {
+		err = fmt.Errorf("failed to upload match: %s", err)
+		return
+	}
+
+	return
+
+}
+
+func (u *usecase) ApproveMatch(ctx context.Context, req request.ApproveRejectMatch, matchCatId, userCatId string) (err error) {
+
+	err = u.repository.UpdatedMatchStatus(ctx, req.MatchId, "approved", matchCatId, userCatId)
+
+	if err != nil {
+		err = fmt.Errorf("failed to approve match: %s", err)
+		return
+	}
+
+	return
+
+}

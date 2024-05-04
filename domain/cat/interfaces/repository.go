@@ -14,4 +14,11 @@ type Repository interface {
 	GetCatUser(ctx context.Context, userId, catId string) (cats entity.Cat, err error)
 	UpdateCat(ctx context.Context, catId, userId string, req request.UploadCat) (err error)
 	DeleteCat(ctx context.Context, catId string) (err error)
+	GetCatUserHasNotMatch(ctx context.Context, userId, catId string) (sex string, err error)
+	GetCatMatchHasNotMatch(ctx context.Context, userId, catId string) (sex string, err error)
+	SaveMatchCat(ctx context.Context, userId string, req request.MatchCat) (matchId string, err error)
+	GetCatByID(ctx context.Context, catId string) (cat entity.Cat, err error)
+	GetMatchByIdAndUserIdApprover(ctx context.Context, matchId string, userId string) (matchCatId, userCatId string, err error)
+	GetMatchStatusPending(ctx context.Context, matchId string) (err error)
+	UpdatedMatchStatus(ctx context.Context, matchId, status, matchCatId, userCatId string) (err error)
 }
