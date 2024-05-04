@@ -30,3 +30,7 @@ type MatchCat struct {
 type ApproveRejectMatch struct {
 	MatchId string `json:"matchId"`
 }
+
+type RejectMatch struct {
+	MatchId string `json:"matchId"`
+}
