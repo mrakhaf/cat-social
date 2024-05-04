@@ -85,21 +85,21 @@ func (u *usecase) GetCat(ctx context.Context, userId string, req request.GetCatP
 		if firstFilterParam {
 
 			if *req.AgeInMonth == "<4" {
-				query = fmt.Sprintf(` %s AND age_in_months < 4`, query)
+				query = fmt.Sprintf(` %s AND ageinmonths < 4`, query)
 			} else if *req.AgeInMonth == "4" {
-				query = fmt.Sprintf(` %s AND age_in_months = 4`, query)
+				query = fmt.Sprintf(` %s AND ageinmonths = 4`, query)
 			} else if *req.AgeInMonth == ">4" {
-				query = fmt.Sprintf(` %s AND age_in_months > 4`, query)
+				query = fmt.Sprintf(` %s AND ageinmonths > 4`, query)
 			}
 		} else {
 			if *req.AgeInMonth == "<4" {
-				query = fmt.Sprintf(` %s WHERE age_in_months < 4`, query)
+				query = fmt.Sprintf(` %s WHERE ageinmonths < 4`, query)
 				firstFilterParam = true
 			} else if *req.AgeInMonth == "4" {
-				query = fmt.Sprintf(` %s WHERE age_in_months = 4`, query)
+				query = fmt.Sprintf(` %s WHERE ageinmonths = 4`, query)
 				firstFilterParam = true
 			} else if *req.AgeInMonth == ">4" {
-				query = fmt.Sprintf(` %s WHERE age_in_months > 4`, query)
+				query = fmt.Sprintf(` %s WHERE ageinmonths > 4`, query)
 				firstFilterParam = true
 			}
 		}
