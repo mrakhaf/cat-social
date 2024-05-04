@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -66,5 +68,5 @@ func main() {
 	catUsecase := catUsecase.NewUsecase(catRepo)
 	catHandler.CatHandler(catGroup, formatResponse, jwtAccess, catUsecase, catRepo)
 
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", os.Getenv("APP_PORT"))))
 }
