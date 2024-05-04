@@ -209,7 +209,7 @@ func (h handlerCat) MatchCat(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 
-	return c.JSON(http.StatusCreated, nil)
+	return c.JSON(http.StatusCreated, map[string]string{"message": "success"})
 
 }
 
