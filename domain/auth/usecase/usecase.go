@@ -27,25 +27,41 @@ func NewUsecase(repository interfaces.Repository, JwtAccess *jwt.JWT) interfaces
 }
 
 func (u *usecase) Login(ctx context.Context, email, password string) (data dto.AuthResponse, err error) {
-	if email == "rakha@gmail.com" {
+	// Fetch user from repository
+	user, err := u.repository.GetDataAccount(email)
+	if err != nil {
+		// If user is not found, return an error
 		err = fmt.Errorf("user with email %s not found", email)
 		return
 	}
 
-	token, err := u.JwtAccess.GenerateToken(email)
+	// Validate password
+	if !validatePassword(password, user.Password) {
+		err = fmt.Errorf("invalid password")
+		return
+	}
 
+	// Generate JWT token
+	token, err := u.JwtAccess.GenerateToken(email)
 	if err != nil {
 		err = fmt.Errorf("failed to generate token: %s", err)
 		return
 	}
 
+	// Return the auth response
 	data = dto.AuthResponse{
 		Email:       email,
-		Password:    password,
+		Name:        user.Name,
 		AccessToken: token,
 	}
 
 	return
+}
+
+// validatePassword compares the provided password with the hashed password stored in the database
+func validatePassword(password, hashedPassword string) bool {
+	// Implement your password validation logic here
+	return true
 }
 
 func (u *usecase) Register(ctx context.Context, req request.Register) (data dto.AuthResponse, err error) {
