@@ -69,6 +69,7 @@ func (u *usecase) Register(ctx context.Context, req request.Register) (data dto.
 	data = dto.AuthResponse{
 		Email:       req.Email,
 		Password:    req.Password,
+		Name:        req.Name,
 		AccessToken: token,
 	}
 
