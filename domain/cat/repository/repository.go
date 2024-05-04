@@ -336,3 +336,35 @@ func (r *repoHandler) DeleteMatch(ctx context.Context, matchId string, userId st
 	return
 
 }
+
+func (r *repoHandler) GetMatchs(ctx context.Context, userId string) (cat dto.MatchCatsDto, err error) {
+
+	query := fmt.Sprintf(`SELECT matchId, message, createdat FROM match_cats WHERE issuedby = '%s'`, userId)
+
+	row := r.catDB.QueryRow(query)
+
+	err = row.Scan(&cat.Id, &cat.Message, &cat.CreatedAt)
+
+	if err != nil {
+		return
+	}
+
+	return
+
+}
+
+func (r *repoHandler) GetAllMatchByUserId(ctx context.Context, userId string) (cat dto.MatchCatsDto, err error) {
+
+	query := fmt.Sprintf(`SELECT matchId, matchcatid, usercatid, issuedby, message, createdat FROM match_cats WHERE issuedby = '%s'`, userId)
+
+	row := r.catDB.QueryRow(query)
+
+	err = row.Scan(&cat.Id, &cat.MatchCatId, &cat.UserCatId, &cat.IssuedBy, &cat.Message, &cat.CreatedAt)
+
+	if err != nil {
+		return
+	}
+
+	return
+
+}
