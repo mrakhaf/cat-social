@@ -226,6 +226,24 @@ func (r *repoHandler) GetMatchByIdAndUserIdApprover(ctx context.Context, matchId
 
 }
 
+func (r *repoHandler) GetMatchById(ctx context.Context, matchId string) (err error) {
+
+	query := fmt.Sprintf(`SELECT matchid FROM match_cats 
+		INNER JOIN cats on match_cats.matchcatid = cats.id 
+		WHERE matchid = '%s'`, matchId)
+
+	row := r.catDB.QueryRow(query)
+
+	err = row.Scan(&matchId)
+
+	if err != nil {
+		return
+	}
+
+	return
+
+}
+
 func (r *repoHandler) GetMatchStatusPending(ctx context.Context, matchId string) (err error) {
 
 	query := fmt.Sprintf(`SELECT matchid FROM match_cats WHERE status = 'pending' AND matchid = '%s'`, matchId)
@@ -235,6 +253,23 @@ func (r *repoHandler) GetMatchStatusPending(ctx context.Context, matchId string)
 	row := r.catDB.QueryRow(query)
 
 	err = row.Scan(&matchId)
+
+	if err != nil && err == sql.ErrNoRows {
+		err = nil
+		return
+	}
+
+	return
+
+}
+
+func (r *repoHandler) GetMatchStatus(ctx context.Context, matchId string) (status string, err error) {
+
+	query := fmt.Sprintf(`SELECT status FROM match_cats WHERE matchid = '%s'`, matchId)
+
+	row := r.catDB.QueryRow(query)
+
+	err = row.Scan(&status)
 
 	if err != nil && err == sql.ErrNoRows {
 		err = nil
@@ -279,6 +314,20 @@ func (r *repoHandler) UpdatedMatchStatus(ctx context.Context, matchId, status, m
 	}
 
 	err = tx.Commit()
+
+	if err != nil {
+		return
+	}
+
+	return
+
+}
+
+func (r *repoHandler) DeleteMatch(ctx context.Context, matchId string, userId string) (err error) {
+
+	query := fmt.Sprintf(`DELETE FROM match_cats WHERE matchid = '%s' AND issuedby = '%s'`, matchId, userId)
+
+	_, err = r.catDB.Exec(query)
 
 	if err != nil {
 		return

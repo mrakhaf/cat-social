@@ -295,3 +295,34 @@ func (u *usecase) RejectMatch(ctx context.Context, req request.RejectMatch, matc
 
 	return
 }
+
+func (u *usecase) DeleteMatch(ctx context.Context, id string, userId string) (err error) {
+
+	matchCatId := u.repository.GetMatchById(ctx, id)
+
+	if matchCatId != nil {
+		err = fmt.Errorf("404")
+		return
+	}
+
+	status, err := u.repository.GetMatchStatus(ctx, id)
+
+	if err != nil {
+		err = fmt.Errorf("failed to get match status: %s", err)
+		return
+	}
+
+	if status == "approved" || status == "rejected" {
+		err = fmt.Errorf("400")
+		return
+	}
+
+	err = u.repository.DeleteMatch(ctx, id, userId)
+
+	if err != nil {
+		err = fmt.Errorf("failed to delete match: %s", err)
+		return
+	}
+
+	return
+}
