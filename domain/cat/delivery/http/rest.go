@@ -34,6 +34,7 @@ func CatHandler(catRoute *echo.Group, Json common.JSON, JwtAccess *jwtAccess.JWT
 	catRoute.POST("/match", handler.MatchCat)
 	catRoute.POST("/match/approve", handler.ApproveMatch)
 	catRoute.POST("/match/reject", handler.RejectMatch)
+	catRoute.DELETE("/match/:id", handler.DeleteMatch)
 }
 
 func (h handlerCat) UploadCat(c echo.Context) error {
@@ -289,5 +290,36 @@ func (h handlerCat) RejectMatch(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]string{"message": "success reject match"})
+
+}
+
+func (h handlerCat) DeleteMatch(c echo.Context) error {
+	id := c.Param("id")
+
+	userId, err := h.JwtAccess.GetUserIdFromToken(c)
+
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
+	}
+
+	if err := c.Bind(&id); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
+	}
+
+	err = h.usecase.DeleteMatch(c.Request().Context(), id, userId)
+
+	if err != nil {
+		if err.Error() == "400" {
+			return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
+		}
+
+		if err.Error() == "404" {
+			return c.JSON(http.StatusNotFound, map[string]string{"message": err.Error()})
+		}
+
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{"message": "success delete match"})
 
 }

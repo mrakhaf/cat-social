@@ -19,6 +19,9 @@ type Repository interface {
 	SaveMatchCat(ctx context.Context, userId string, req request.MatchCat) (matchId string, err error)
 	GetCatByID(ctx context.Context, catId string) (cat entity.Cat, err error)
 	GetMatchByIdAndUserIdApprover(ctx context.Context, matchId string, userId string) (matchCatId, userCatId string, err error)
+	GetMatchById(ctx context.Context, matchId string) (err error)
 	GetMatchStatusPending(ctx context.Context, matchId string) (err error)
 	UpdatedMatchStatus(ctx context.Context, matchId, status, matchCatId, userCatId string) (err error)
+	GetMatchStatus(ctx context.Context, matchId string) (status string, err error)
+	DeleteMatch(ctx context.Context, matchId string, userId string) (err error)
 }
