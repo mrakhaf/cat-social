@@ -33,6 +33,7 @@ func CatHandler(catRoute *echo.Group, Json common.JSON, JwtAccess *jwtAccess.JWT
 	catRoute.DELETE("/:id", handler.DeleteCat)
 	catRoute.POST("/match", handler.MatchCat)
 	catRoute.POST("/match/approve", handler.ApproveMatch)
+	catRoute.POST("/match/reject", handler.RejectMatch)
 }
 
 func (h handlerCat) UploadCat(c echo.Context) error {
@@ -249,5 +250,44 @@ func (h handlerCat) ApproveMatch(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]string{"message": "success approve match"})
+
+}
+
+func (h handlerCat) RejectMatch(c echo.Context) error {
+	var req request.RejectMatch
+
+	userId, err := h.JwtAccess.GetUserIdFromToken(c)
+
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
+	}
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
+	}
+
+	err = h.repository.GetMatchStatusPending(c.Request().Context(), req.MatchId)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
+	}
+
+	matchCatId, userCatId, err := h.repository.GetMatchByIdAndUserIdApprover(c.Request().Context(), req.MatchId, userId)
+
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"message": err.Error()})
+	}
+
+	err = h.usecase.RejectMatch(c.Request().Context(), req, matchCatId, userCatId)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{"message": "success reject match"})
 
 }

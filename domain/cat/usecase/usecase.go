@@ -283,3 +283,15 @@ func (u *usecase) ApproveMatch(ctx context.Context, req request.ApproveRejectMat
 	return
 
 }
+
+func (u *usecase) RejectMatch(ctx context.Context, req request.RejectMatch, matchCatId, userCatId string) (err error) {
+
+	err = u.repository.UpdatedMatchStatus(ctx, req.MatchId, "rejected", matchCatId, userCatId)
+
+	if err != nil {
+		err = fmt.Errorf("failed to reject match: %s", err)
+		return
+	}
+
+	return
+}
