@@ -24,4 +24,5 @@ type Repository interface {
 	UpdatedMatchStatus(ctx context.Context, matchId, status, matchCatId, userCatId string) (err error)
 	GetMatchStatus(ctx context.Context, matchId string) (status string, err error)
 	DeleteMatch(ctx context.Context, matchId string, userId string) (err error)
+	GetAllMatchByUserId(ctx context.Context, userId string) (data dto.MatchCatsDto, err error)
 }

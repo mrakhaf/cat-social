@@ -65,7 +65,7 @@ func main() {
 
 	//cat
 	catRepo := catRepo.NewRepository(catDB)
-	catUsecase := catUsecase.NewUsecase(catRepo)
+	catUsecase := catUsecase.NewUsecase(catRepo, authRepo)
 	catHandler.CatHandler(catGroup, formatResponse, jwtAccess, catUsecase, catRepo)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", os.Getenv("APP_PORT"))))

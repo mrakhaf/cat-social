@@ -17,4 +17,5 @@ type Usecase interface {
 	ApproveMatch(ctx context.Context, req request.ApproveRejectMatch, matchCatId, userCatId string) (err error)
 	RejectMatch(ctx context.Context, req request.RejectMatch, matchCatId, userCatId string) (err error)
 	DeleteMatch(ctx context.Context, req string, userId string) (err error)
+	GetMatchs(ctx context.Context, userId string) (data interface{}, err error)
 }
